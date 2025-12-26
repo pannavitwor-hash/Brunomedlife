@@ -532,15 +532,24 @@
 
             .left {
                 padding: 14px;
+                justify-content: center;
+                /* ✅ center container */
             }
 
             .stickyBox {
                 position: static;
+                /* ✅ no sticky on mobile */
             }
 
             .profileImg {
-                max-width: 420px;
-                transform: none;
+                width: min(92vw, 420px);
+                /* ✅ responsive width */
+                aspect-ratio: 4 / 5;
+                transform: none !important;
+                /* ✅ prevent weird offsets */
+                transform-origin: center top;
+                margin: 0 auto;
+                /* ✅ center image */
             }
 
             .name {
@@ -552,6 +561,7 @@
                 height: 280px;
             }
         }
+
 
         @media (prefers-reduced-motion: reduce) {
             * {
@@ -738,18 +748,32 @@
         }
         renderActivities();
 
-        // ✅ Make profile image move DOWN a bit as you scroll (without breaking X)
         const img = document.getElementById("profileImg");
 
-        window.addEventListener("scroll", () => {
+        function isMobile() {
+            return window.matchMedia("(max-width: 980px)").matches;
+        }
+
+        function applyDesktopScrollEffect() {
+            if (!img) return;
+
+            // ✅ If mobile, reset and do nothing
+            if (isMobile()) {
+                img.style.transform = "none";
+                return;
+            }
+
             const y = window.scrollY;
+            const follow = Math.min(y * 0.9, 5000);
+            const scale = 1.25 - Math.min(y / 2500, 0.15);
 
-            const follow = Math.min(y * 0.9, 5000); // move down
-            const scale = 1.25 - Math.min(y /2500, 0.15);
+            img.style.transform = `translateX(-200px) translateY(${follow}px) scale(${scale})`;
+        }
 
-            img.style.transform =
-                `translateX(-200px) translateY(${follow}px) scale(${scale})`;
-        }, { passive: true });
+        window.addEventListener("scroll", applyDesktopScrollEffect, { passive: true });
+        window.addEventListener("resize", applyDesktopScrollEffect);
+        applyDesktopScrollEffect();
+
     </script>
 </body>
 
