@@ -1,0 +1,1538 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Brunomedlife</title>
+
+  <!-- Modern Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet" />
+
+  <style>
+    /* =========================
+       1) RESET + BASE
+       ========================= */
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Plus Jakarta Sans", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      transition: background .25s ease, color .25s ease;
+      overflow-x: hidden;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button {
+      font-family: inherit;
+    }
+
+    ::selection {
+      background: rgba(16, 185, 129, 0.25);
+    }
+
+    /* =========================
+       2) THEME VARIABLES
+       - Light default
+       ========================= */
+    :root {
+      --grad: linear-gradient(135deg, #2563eb, #10b981);
+      --grad2: linear-gradient(135deg, rgba(37, 99, 235, .35), rgba(16, 185, 129, .35));
+      --grad3: linear-gradient(90deg, #22c55e, #38bdf8, #2563eb);
+
+      --bg: #f8fbff;
+      /* softer than pure white */
+      --text: #0f172a;
+      --muted: rgba(15, 23, 42, 0.72);
+
+      --surface: rgba(255, 255, 255, 0.72);
+      --card: rgba(255, 255, 255, 0.92);
+
+      --border: rgba(15, 23, 42, 0.12);
+      --shadow: 0 16px 40px rgba(15, 23, 42, 0.10);
+
+      --radius: 18px;
+      --max: 1050px;
+
+      --ring: 0 0 0 3px rgba(56, 189, 248, 0.20);
+    }
+
+    /* Dark Mode */
+    body[data-theme="dark"] {
+      --bg: #070b18;
+      --text: rgba(255, 255, 255, 0.92);
+      --muted: rgba(255, 255, 255, 0.70);
+
+      --surface: rgba(15, 23, 42, 0.72);
+      --card: rgba(15, 23, 42, 0.88);
+
+      --border: rgba(255, 255, 255, 0.14);
+      --shadow: 0 18px 46px rgba(0, 0, 0, 0.42);
+
+      --ring: 0 0 0 3px rgba(16, 185, 129, 0.22);
+    }
+
+    /* =========================
+       3) FANCY BACKGROUND LAYERS
+       ========================= */
+    .bgGlow {
+      position: fixed;
+      inset: -240px -240px auto -240px;
+      height: 520px;
+      background: var(--grad);
+      filter: blur(95px);
+      opacity: 0.22;
+      pointer-events: none;
+      z-index: 0;
+      transition: opacity .25s ease;
+    }
+
+    body[data-theme="dark"] .bgGlow {
+      opacity: 0.30;
+    }
+
+    /* Animated “aurora” layer (slow moving gradients) */
+    .aurora {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.85;
+      background:
+        radial-gradient(900px 500px at 10% 15%, rgba(37, 99, 235, .20), transparent 50%),
+        radial-gradient(900px 500px at 90% 25%, rgba(16, 185, 129, .22), transparent 55%),
+        radial-gradient(700px 500px at 50% 90%, rgba(56, 189, 248, .16), transparent 55%);
+      transform: translateZ(0);
+    }
+
+    .aurora::after {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      background:
+        radial-gradient(600px 400px at 20% 30%, rgba(16, 185, 129, .18), transparent 55%),
+        radial-gradient(600px 400px at 70% 60%, rgba(37, 99, 235, .16), transparent 55%),
+        radial-gradient(600px 400px at 50% 80%, rgba(56, 189, 248, .12), transparent 55%);
+      filter: blur(2px);
+      animation: drift 14s ease-in-out infinite alternate;
+      opacity: 0.9;
+    }
+
+    @keyframes drift {
+      0% {
+        transform: translate(-2%, -2%) rotate(-2deg);
+      }
+
+      100% {
+        transform: translate(2%, 2%) rotate(2deg);
+      }
+    }
+
+    /* Mouse-follow blob */
+    .cursorBlob {
+      position: fixed;
+      width: 380px;
+      height: 380px;
+      border-radius: 999px;
+      background: var(--grad2);
+      filter: blur(35px);
+      opacity: 0.35;
+      pointer-events: none;
+      z-index: 0;
+      transform: translate(-50%, -50%);
+      transition: opacity .25s ease;
+      mix-blend-mode: multiply;
+    }
+
+    body[data-theme="dark"] .cursorBlob {
+      opacity: 0.30;
+      mix-blend-mode: screen;
+    }
+
+    /* =========================
+       4) LAYOUT
+       ========================= */
+    .wrap {
+      position: relative;
+      z-index: 1;
+      /* above background */
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 26px 16px 70px;
+    }
+
+    /* Top bar */
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 999px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      box-shadow: 0 10px 22px rgba(15, 23, 42, 0.06);
+      backdrop-filter: blur(10px);
+      font-size: 13px;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .crumbDot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--grad);
+      flex: 0 0 auto;
+    }
+
+    .crumbSep {
+      opacity: .55;
+    }
+
+    /* Dark toggle (more colorful) */
+    .toggleBtn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 999px;
+      cursor: pointer;
+      user-select: none;
+
+      background:
+        linear-gradient(var(--card), var(--card)) padding-box,
+        var(--grad) border-box;
+      border: 1px solid transparent;
+      box-shadow: 0 12px 26px rgba(15, 23, 42, 0.10);
+      transition: transform .15s ease, box-shadow .15s ease;
+    }
+
+    /* ✅ Dark mode: force button text to white */
+    body[data-theme="dark"] .toggleBtn {
+      color: #ffffff;
+      /* text = white */
+    }
+
+    /* ✅ Also ensure icon stays white */
+    body[data-theme="dark"] .toggleIcon {
+      color: #ffffff;
+      /* moon icon = white */
+    }
+
+
+    .toggleBtn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 36px rgba(15, 23, 42, 0.14);
+    }
+
+    .toggleIcon {
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      background: var(--grad);
+      display: grid;
+      place-items: center;
+      color: white;
+      font-weight: 800;
+      box-shadow: 0 10px 22px rgba(16, 185, 129, 0.25);
+    }
+
+    .toggleText {
+      font-weight: 800;
+      letter-spacing: -0.2px;
+    }
+
+    /* =========================
+       5) HEADER
+       ========================= */
+    header {
+      display: grid;
+      grid-template-columns: 98px 1fr;
+      gap: 16px;
+      align-items: center;
+      padding: 18px;
+
+      border-radius: 22px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+
+      opacity: 0;
+      transform: translateY(10px);
+      animation: fadeUp .75s ease forwards;
+    }
+
+    @keyframes fadeUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .avatar {
+      width: 98px;
+      height: 98px;
+      border-radius: 24px;
+      /* modern square */
+      background: var(--grad);
+      display: grid;
+      place-items: center;
+      color: white;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .avatar::after {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      background: var(--grad3);
+      opacity: .35;
+      animation: shimmer 3.8s ease-in-out infinite alternate;
+      transform: rotate(18deg);
+    }
+
+    /* ✅ Avatar inner container keeps the gradient border */
+    .avatar {
+      padding: 5px;
+      /* border thickness */
+    }
+
+    /* ✅ Inner box holds the image and clips it */
+    .avatarInner {
+      width: 100%;
+      height: 100%;
+      border-radius: 20px;
+      /* match your avatar rounded square */
+      overflow: hidden;
+      /* IMPORTANT: crops the image */
+      background: white;
+      /* fallback behind transparent logos */
+      display: grid;
+      place-items: center;
+      position: relative;
+      z-index: 2;
+      /* above avatar shimmer */
+    }
+
+    /* ✅ Image fit settings */
+    .avatarInner img {
+      width: 110%;
+      height: 110%;
+      object-fit: contain;
+      /* BEST for logos (no crop) */
+      display: block;
+      transform: translateY(-7px);
+      /* ✅ move up (increase number to move more) */
+
+    }
+
+    @keyframes shimmer {
+      0% {
+        transform: translateX(-10%) rotate(18deg);
+      }
+
+      100% {
+        transform: translateX(10%) rotate(18deg);
+      }
+    }
+
+    .avatar span {
+      position: relative;
+      z-index: 1;
+    }
+
+    .title h1 {
+      margin: 0;
+      font-size: 34px;
+      line-height: 1.08;
+      letter-spacing: -0.8px;
+    }
+
+    /* Gradient text */
+    .gradientText {
+      background: var(--grad3);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .badgeRow {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 11px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+
+      background:
+        linear-gradient(var(--card), var(--card)) padding-box,
+        var(--grad) border-box;
+      border: 1px solid transparent;
+      color: var(--muted);
+    }
+
+    .chip i {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: var(--grad);
+      display: inline-block;
+    }
+
+    .subtitle {
+      margin: 10px 0 0 0;
+      color: var(--muted);
+      max-width: 70ch;
+    }
+
+    /* =========================
+       6) COLORFUL NAV BUTTONS
+       ========================= */
+    .nav {
+      margin-top: 16px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    .nav a {
+      border-radius: 16px;
+      padding: 13px 12px;
+      text-align: center;
+      font-weight: 900;
+
+      /* ✅ More color: gradient fill */
+      color: white;
+      background: var(--grad);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      box-shadow: 0 16px 30px rgba(37, 99, 235, 0.18);
+
+      position: relative;
+      overflow: hidden;
+      transform: translateY(0);
+      transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+    }
+
+    /* Moving light streak */
+    .nav a::after {
+      content: "";
+      position: absolute;
+      top: -40%;
+      left: -60%;
+      width: 70%;
+      height: 200%;
+      background: rgba(255, 255, 255, 0.25);
+      transform: rotate(20deg);
+      filter: blur(2px);
+      transition: left .45s ease;
+    }
+
+    .nav a:hover::after {
+      left: 120%;
+    }
+
+    .nav a:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 22px 45px rgba(16, 185, 129, 0.20);
+      filter: saturate(1.1);
+    }
+
+    .nav a:focus {
+      outline: none;
+      box-shadow: var(--ring), 0 22px 45px rgba(16, 185, 129, 0.20);
+    }
+
+    /* =========================
+       7) SECTIONS + REVEAL
+       ========================= */
+    section {
+      margin-top: 18px;
+      padding: 18px;
+      border-radius: 22px;
+
+      background: var(--card);
+      border: 1px solid var(--border);
+      box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+
+      opacity: 0;
+      transform: translateY(14px) scale(0.995);
+    }
+
+    .reveal {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      transition: opacity .7s ease, transform .7s ease;
+    }
+
+    .secHead {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .secHead h2 {
+      margin: 0;
+      font-size: 22px;
+      letter-spacing: -0.35px;
+    }
+
+    .secTag {
+      padding: 8px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+      color: white;
+      background: var(--grad);
+      box-shadow: 0 12px 26px rgba(37, 99, 235, 0.18);
+      white-space: nowrap;
+    }
+
+    .muted {
+      color: var(--muted);
+      margin: 0;
+    }
+
+    /* =========================
+       8) PERSONAL INFO UI KIT
+       - Tabs, Accordion, Pagination, Carousel
+       ========================= */
+
+    /* Tabs */
+    .tabs {
+      margin-top: 14px;
+      border-radius: 18px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 10px;
+      backdrop-filter: blur(10px);
+    }
+
+    .tabRow {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .tabBtn {
+      border: none;
+      cursor: pointer;
+      padding: 10px 12px;
+      border-radius: 999px;
+      font-weight: 900;
+
+      /* colorful tabs */
+      color: var(--text);
+      background:
+        linear-gradient(var(--card), var(--card)) padding-box,
+        var(--grad) border-box;
+      border: 1px solid transparent;
+
+      transition: transform .15s ease, filter .15s ease;
+    }
+
+    .tabBtn:hover {
+      transform: translateY(-2px);
+      filter: saturate(1.1);
+    }
+
+    .tabBtn[aria-selected="true"] {
+      color: white;
+      background: var(--grad);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      box-shadow: 0 16px 30px rgba(16, 185, 129, 0.18);
+    }
+
+    .tabPanel {
+      display: none;
+    }
+
+    .tabPanel.active {
+      display: block;
+    }
+
+    /* “Topic cards” row */
+    .topicGrid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .topicCard {
+      border-radius: 18px;
+      padding: 14px;
+      background:
+        linear-gradient(var(--card), var(--card)) padding-box,
+        var(--grad2) border-box;
+      border: 1px solid transparent;
+      box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
+      transition: transform .18s ease, box-shadow .18s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Keep 3 columns on desktop */
+    .topicGrid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      align-items: stretch;
+    }
+
+    /* Only collapse to 1 column on smaller screens */
+    @media (max-width: 700px) {
+      .topicGrid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Make the About card clickable and fill nicely */
+    .topicCardLink {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 140px;
+    }
+
+    /* Top row inside the About card */
+    .topicCardTop {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .topicAvatar {
+      width: 100px;
+      height: 100px;
+      border-radius: 16px;
+      object-fit: cover;
+      flex: 0 0 auto;
+      box-shadow: 0 12px 24px rgba(15, 23, 42, 0.10);
+      border: 1px solid rgba(255, 255, 255, 0.35);
+    }
+
+    /* Bottom row inside the About card */
+    .topicCardBottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    /* Pill inside About card */
+    .topicPill {
+      font-size: 12px;
+      font-weight: 900;
+      color: white;
+      background: var(--grad);
+      padding: 6px 10px;
+      border-radius: 999px;
+      box-shadow: 0 12px 26px rgba(37, 99, 235, 0.18);
+    }
+
+    /* Dark arrow for light card */
+    .arrowDark {
+      width: 10px;
+      height: 10px;
+      border-right: 2px solid var(--muted);
+      border-top: 2px solid var(--muted);
+      transform: rotate(45deg);
+      flex: 0 0 auto;
+    }
+
+
+    .topicCard::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: var(--grad2);
+      opacity: 0;
+      transition: opacity .25s ease;
+    }
+
+    .topicCard:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 22px 46px rgba(37, 99, 235, 0.14);
+    }
+
+    .topicCard:hover::after {
+      opacity: .45;
+    }
+
+    .topicCard h3 {
+      margin: 0 0 6px 0;
+      font-size: 16px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .topicCard p {
+      margin: 0;
+      font-size: 14px;
+      color: var(--muted);
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Accordion / Collapse */
+    .accordion {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    details {
+      border-radius: 18px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      box-shadow: 0 12px 26px rgba(15, 23, 42, 0.06);
+      overflow: hidden;
+    }
+
+    summary {
+      list-style: none;
+      cursor: pointer;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-weight: 900;
+    }
+
+    summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .sumLeft {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .sumTitle {
+      font-size: 14px;
+    }
+
+    .sumMeta {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .chev {
+      width: 10px;
+      height: 10px;
+      border-right: 2px solid var(--muted);
+      border-top: 2px solid var(--muted);
+      transform: rotate(45deg);
+      transition: transform .2s ease;
+      flex: 0 0 auto;
+    }
+
+    details[open] .chev {
+      transform: rotate(135deg);
+    }
+
+    .detailBody {
+      padding: 0 14px 14px 14px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .tagPillRow {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .tagPill {
+      font-size: 12px;
+      font-weight: 800;
+      color: white;
+      background: var(--grad);
+      padding: 6px 10px;
+      border-radius: 999px;
+      box-shadow: 0 10px 20px rgba(37, 99, 235, 0.16);
+    }
+
+    /* Pagination */
+    .pager {
+      margin-top: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .pagerInfo {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .pagerBtns {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn {
+      border: none;
+      cursor: pointer;
+      padding: 10px 12px;
+      border-radius: 14px;
+      font-weight: 900;
+      color: white;
+      background: var(--grad);
+      box-shadow: 0 16px 30px rgba(16, 185, 129, 0.18);
+      transition: transform .15s ease, filter .15s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      filter: saturate(1.1);
+    }
+
+    .btn:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+      transform: none;
+      filter: none;
+    }
+
+    /* Carousel (simple scroll snap) */
+    .carousel {
+      margin-top: 12px;
+      display: flex;
+      gap: 12px;
+      overflow: auto;
+      padding-bottom: 8px;
+      scroll-snap-type: x mandatory;
+    }
+
+    .carousel::-webkit-scrollbar {
+      height: 10px;
+    }
+
+    .carousel::-webkit-scrollbar-thumb {
+      background: rgba(100, 116, 139, 0.35);
+      border-radius: 999px;
+    }
+
+    .slide {
+      min-width: 260px;
+      scroll-snap-align: start;
+      border-radius: 18px;
+      padding: 14px;
+      background:
+        linear-gradient(var(--card), var(--card)) padding-box,
+        var(--grad) border-box;
+      border: 1px solid transparent;
+      box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
+    }
+
+    .slide h4 {
+      margin: 0 0 6px 0;
+      font-size: 16px;
+    }
+
+    .slide p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    /* =========================
+       9) OTHER SECTIONS CARDS
+       ========================= */
+    .grid3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .card {
+      border-radius: 18px;
+      padding: 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      box-shadow: 0 12px 26px rgba(15, 23, 42, 0.06);
+      transition: transform .18s ease, box-shadow .18s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 40px rgba(37, 99, 235, 0.12);
+    }
+
+    .card h3 {
+      margin: 0 0 6px 0;
+      font-size: 16px;
+    }
+
+    .card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    /* Link buttons */
+    .links {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .linkBtn {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 18px;
+
+      color: white;
+      background: var(--grad);
+      box-shadow: 0 18px 36px rgba(37, 99, 235, 0.18);
+      transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .linkBtn::after {
+      content: "";
+      position: absolute;
+      top: -40%;
+      left: -60%;
+      width: 70%;
+      height: 200%;
+      background: rgba(255, 255, 255, 0.22);
+      transform: rotate(20deg);
+      transition: left .5s ease;
+      filter: blur(2px);
+    }
+
+    .linkBtn:hover::after {
+      left: 120%;
+    }
+
+    .linkBtn:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 26px 56px rgba(16, 185, 129, 0.22);
+      filter: saturate(1.08);
+    }
+
+    .linkLeft {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .small {
+      font-size: 12px;
+      opacity: .92;
+    }
+
+    .arrow {
+      width: 10px;
+      height: 10px;
+      border-right: 2px solid rgba(255, 255, 255, 0.90);
+      border-top: 2px solid rgba(255, 255, 255, 0.90);
+      transform: rotate(45deg);
+      flex: 0 0 auto;
+    }
+
+    /* Footer */
+    footer {
+      margin-top: 18px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+      opacity: .95;
+    }
+
+    /* =========================
+       10) RESPONSIVE
+       ========================= */
+    @media (max-width: 900px) {
+      .nav {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .topicGrid,
+      .grid3 {
+        grid-template-columns: 1fr;
+      }
+
+      header {
+        grid-template-columns: 78px 1fr;
+      }
+
+      .avatar {
+        width: 78px;
+        height: 78px;
+        border-radius: 20px;
+      }
+
+      .title h1 {
+        font-size: 28px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation: none !important;
+        transition: none !important;
+      }
+
+      .cursorBlob {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Background layers -->
+  <div class="bgGlow"></div>
+  <div class="aurora"></div>
+  <div class="cursorBlob" id="cursorBlob" aria-hidden="true"></div>
+
+  <main class="wrap">
+    <!-- Topbar: breadcrumbs + theme toggle -->
+    <div class="topbar">
+      <div class="breadcrumbs" title="You are here">
+        <span class="crumbDot"></span>
+        <span>Home</span>
+        <span class="crumbSep">›</span>
+        <span>Brunomedlife</span>
+        <span class="crumbSep">›</span>
+        <span>Portfolio</span>
+      </div>
+
+      <button class="toggleBtn" id="themeToggle" type="button" aria-label="Toggle dark mode">
+        <span class="toggleIcon" id="toggleIcon">☀</span>
+        <span class="toggleText" id="toggleText">Light</span>
+      </button>
+    </div>
+
+    <!-- Header -->
+    <header>
+      <div class="avatar">
+        <div class="avatarInner">
+          <img src="image/brunomedlife logo.jpg" alt="Brunomedlife logo">
+        </div>
+      </div>
+      <div class="title">
+        <h1 class="gradientText">Brunomedlife</h1>
+
+        <div class="badgeRow">
+          <span class="chip"><i></i> Medical Student Life</span>
+          <span class="chip"><i></i> Tutoring</span>
+          <span class="chip"><i></i> Portfolio</span>
+        </div>
+
+        <p class="subtitle muted">
+          An Enthusiastic medical student in EVERYTHING.
+        </p>
+      </div>
+    </header>
+
+    <!-- Colorful nav -->
+    <nav class="nav" aria-label="Page sections">
+      <a href="#Personalinformation">Personal Info</a>
+      <a href="#Studentlife">Student Life</a>
+      <a href="#Courses">Courses</a>
+      <a href="#Medicalportfolio">Portfolio</a>
+    </nav>
+
+    <!-- =========================
+         SECTION: PERSONAL INFO (Tabs + Accordion + Pagination + Carousel)
+         ========================= -->
+    <section id="Personalinformation">
+      <div class="secHead">
+        <div>
+          <h2>Personal Information</h2>
+          <p class="muted">Tabs + collapses + pagination + carousel (template you can customize).</p>
+        </div>
+        <span class="secTag">UI Kit</span>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs" role="tablist" aria-label="Personal info tabs">
+        <div class="tabRow">
+          <button class="tabBtn" role="tab" aria-selected="true" data-tab="topic">Topic</button>
+          <button class="tabBtn" role="tab" aria-selected="false" data-tab="experience">Experience</button>
+          <button class="tabBtn" role="tab" aria-selected="false" data-tab="achievement">Achievement</button>
+          <button class="tabBtn" role="tab" aria-selected="false" data-tab="education">Education</button>
+        </div>
+
+        <!-- TAB: Topic -->
+        <div class="tabPanel active" id="tab-topic">
+          <p class="muted">Use these topic cards as your “profile highlights”.</p>
+
+          <div class="topicGrid">
+            <!-- About Me = clickable card that goes to cv.html -->
+            <a class="topicCard topicCardLink" href="cv.html">
+              <div class="topicCardTop">
+                <img class="topicAvatar" src="image/Boss photo.jpg" alt="Profile photo">
+                <div>
+                  <h3>About Me</h3>
+                  <p class="muted">Curriculum Vitae • profile • experiences</p>
+                </div>
+              </div>
+
+              <div class="topicCardBottom">
+                <span class="topicPill">Open CV</span>
+                <span class="arrowDark"></span>
+              </div>
+            </a>
+
+            <div class="topicCard">
+              <h3>Focus</h3>
+              <p>High-yield study tools, tutoring, and medical portfolio building.</p>
+            </div>
+
+            <div class="topicCard">
+              <h3>Interests</h3>
+              <p>Clinical reasoning, anatomy/physio, research projects, education design.</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <div class="topicCard">
+        <h3>Focus</h3>
+        <p>High-yield study tools, tutoring, and medical portfolio building.</p>
+      </div>
+      <div class="topicCard">
+        <h3>Interests</h3>
+        <p>Clinical reasoning, anatomy/physio, research projects, education design.</p>
+      </div>
+      </div>
+
+      <!-- Simple carousel -->
+      <div class="carousel" aria-label="Highlights carousel">
+        <div class="slide">
+          <h4>Highlight #1</h4>
+          <p>“President of ______” leadership story + impact summary.</p>
+        </div>
+        <div class="slide">
+          <h4>Highlight #2</h4>
+          <p>Teaching/tutoring: topics, students helped, outcomes.</p>
+        </div>
+        <div class="slide">
+          <h4>Highlight #3</h4>
+          <p>Research: poster / abstract / lab skill showcase.</p>
+        </div>
+        <div class="slide">
+          <h4>Highlight #4</h4>
+          <p>Event management: scale, role, teamwork, results.</p>
+        </div>
+      </div>
+      </div>
+
+      <!-- TAB: Experience (Accordion + Pagination) -->
+      <div class="tabPanel" id="tab-experience">
+        <p class="muted">Click each item to expand. Use pagination below to “page” the list.</p>
+
+        <!-- Accordion list (we will paginate items via JS) -->
+        <div class="accordion" id="expList"></div>
+
+        <!-- Pagination controls -->
+        <div class="pager">
+          <div class="pagerInfo" id="pagerInfo">Showing 1–5</div>
+          <div class="pagerBtns">
+            <button class="btn" id="prevPage" type="button">Prev</button>
+            <button class="btn" id="nextPage" type="button">Next</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: Achievement -->
+      <div class="tabPanel" id="tab-achievement">
+        <p class="muted">Put awards/certificates here. Add links later.</p>
+
+        <div class="grid3">
+          <div class="card">
+            <h3>Certificate</h3>
+            <p>Example: Academic Excellence Award • 2025</p>
+          </div>
+          <div class="card">
+            <h3>Competition</h3>
+            <p>Example: Research poster finalist • 2024</p>
+          </div>
+          <div class="card">
+            <h3>Publication</h3>
+            <p>Example: Abstract accepted • Conference • 2025</p>
+          </div>
+        </div>
+
+        <div class="links">
+          <a class="linkBtn" href="https://example.com" target="_blank">
+            <div class="linkLeft">
+              <strong>Awards Folder</strong>
+              <span class="small">Google Drive / Notion (replace link)</span>
+            </div>
+            <span class="arrow"></span>
+          </a>
+        </div>
+      </div>
+
+      <!-- TAB: Education -->
+      <div class="tabPanel" id="tab-education">
+        <p class="muted">Education timeline template.</p>
+
+        <div class="accordion">
+          <details open>
+            <summary>
+              <div class="sumLeft">
+                <div class="sumTitle">Medical School</div>
+                <div class="sumMeta">Year 1–Now • University / Faculty</div>
+              </div>
+              <span class="chev"></span>
+            </summary>
+            <div class="detailBody">
+              Add modules, GPA (if you want), favorite subjects, projects, electives.
+              <div class="tagPillRow">
+                <span class="tagPill">Anatomy</span>
+                <span class="tagPill">Physiology</span>
+                <span class="tagPill">Research</span>
+              </div>
+            </div>
+          </details>
+
+          <details>
+            <summary>
+              <div class="sumLeft">
+                <div class="sumTitle">High School</div>
+                <div class="sumMeta">Science program • Year–Year</div>
+              </div>
+              <span class="chev"></span>
+            </summary>
+            <div class="detailBody">
+              Add achievements, clubs, competitions, etc.
+            </div>
+          </details>
+        </div>
+      </div>
+      </div>
+    </section>
+
+    <!-- =========================
+         SECTION: STUDENT LIFE
+         ========================= -->
+    <section id="Studentlife">
+      <div class="secHead">
+        <div>
+          <h2>Student Life</h2>
+          <p class="muted">More colorful cards + links.</p>
+        </div>
+        <span class="secTag">Lifestyle</span>
+      </div>
+
+      <div class="grid3">
+        <div class="card">
+          <h3>Daily Routine</h3>
+          <p>Deep work blocks • review • sleep • exercise • consistency.</p>
+        </div>
+        <div class="card">
+          <h3>Study System</h3>
+          <p>Active recall, spaced repetition, mini-tests, weekly planner.</p>
+        </div>
+        <div class="card">
+          <h3>Clinical Mindset</h3>
+          <p>Problem → differential → plan. Build this habit daily.</p>
+        </div>
+      </div>
+
+      <div class="links">
+        <a class="linkBtn" href="https://example.com" target="_blank">
+          <div class="linkLeft">
+            <strong>Instagram / Reels</strong>
+            <span class="small">Replace with your real link</span>
+          </div>
+          <span class="arrow"></span>
+        </a>
+        <a class="linkBtn" href="https://example.com" target="_blank">
+          <div class="linkLeft">
+            <strong>Study Notes</strong>
+            <span class="small">Notion / Drive</span>
+          </div>
+          <span class="arrow"></span>
+        </a>
+      </div>
+    </section>
+
+    <!-- =========================
+         SECTION: COURSES
+         ========================= -->
+    <section id="Courses">
+      <div class="secHead">
+        <div>
+          <h2>Courses</h2>
+          <p class="muted">Add your modules and resources.</p>
+        </div>
+        <span class="secTag">Academics</span>
+      </div>
+
+      <div class="grid3">
+        <div class="card">
+          <h3>Anatomy</h3>
+          <p>Diagrams + mnemonics + practical tips.</p>
+        </div>
+        <div class="card">
+          <h3>Physiology</h3>
+          <p>Concept-first + questions + summary sheets.</p>
+        </div>
+        <div class="card">
+          <h3>Pathology</h3>
+          <p>Mechanisms + patterns + exam strategy.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================
+         SECTION: PORTFOLIO
+         ========================= -->
+    <section id="Medicalportfolio">
+      <div class="secHead">
+        <div>
+          <h2>Medical Portfolio</h2>
+          <p class="muted">Collect research, leadership, projects, volunteering.</p>
+        </div>
+        <span class="secTag">Profile</span>
+      </div>
+
+      <div class="grid3">
+        <div class="card">
+          <h3>Research</h3>
+          <p>Posters, manuscripts, lab work — include links and short summaries.</p>
+        </div>
+        <div class="card">
+          <h3>Teaching / Content</h3>
+          <p>Slides, notes, tutorials, and student-friendly explanations.</p>
+        </div>
+        <div class="card">
+          <h3>Leadership</h3>
+          <p>Clubs, projects, events — highlight your role + outcomes.</p>
+        </div>
+      </div>
+
+      <div class="links">
+        <a class="linkBtn" href="https://example.com" target="_blank">
+          <div class="linkLeft">
+            <strong>Portfolio PDF</strong>
+            <span class="small">Replace with your drive link</span>
+          </div>
+          <span class="arrow"></span>
+        </a>
+      </div>
+    </section>
+
+    <footer>
+      © <span id="year"></span> Brunomedlife • Edit everything freely
+    </footer>
+  </main>
+
+  <script>
+    // =========================
+    // 1) Footer year
+    // =========================
+    document.getElementById("year").textContent = new Date().getFullYear();
+
+    // =========================
+    // 2) Dark Mode Toggle (save to localStorage)
+    // =========================
+    const body = document.body;
+    const btn = document.getElementById("themeToggle");
+    const icon = document.getElementById("toggleIcon");
+    const text = document.getElementById("toggleText");
+
+    const savedTheme = localStorage.getItem("theme");
+    const systemDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+
+    if (savedTheme) body.dataset.theme = savedTheme;
+    else body.dataset.theme = systemDark ? "dark" : "light";
+
+    function updateToggleUI() {
+      const isDark = body.dataset.theme === "dark";
+      icon.textContent = isDark ? "⏾" : "☀";
+      text.textContent = isDark ? "Dark" : "Light";
+    }
+    updateToggleUI();
+
+    btn.addEventListener("click", () => {
+      body.dataset.theme = body.dataset.theme === "dark" ? "light" : "dark";
+      localStorage.setItem("theme", body.dataset.theme);
+      updateToggleUI();
+    });
+
+    // =========================
+    // 3) Scroll Reveal
+    // =========================
+    const sections = document.querySelectorAll("section");
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("reveal");
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    sections.forEach(sec => observer.observe(sec));
+
+    // =========================
+    // 4) Mouse-follow blob (fancy modern effect)
+    // =========================
+    const blob = document.getElementById("cursorBlob");
+    window.addEventListener("mousemove", (e) => {
+      // smooth follow (lerp-ish)
+      blob.style.left = e.clientX + "px";
+      blob.style.top = e.clientY + "px";
+    });
+
+    // =========================
+    // 5) Tabs logic (Personal Info)
+    // =========================
+    const tabButtons = document.querySelectorAll(".tabBtn");
+    const panels = {
+      topic: document.getElementById("tab-topic"),
+      experience: document.getElementById("tab-experience"),
+      achievement: document.getElementById("tab-achievement"),
+      education: document.getElementById("tab-education")
+    };
+
+    tabButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        tabButtons.forEach(b => b.setAttribute("aria-selected", "false"));
+        btn.setAttribute("aria-selected", "true");
+
+        Object.values(panels).forEach(p => p.classList.remove("active"));
+        const key = btn.dataset.tab;
+        panels[key].classList.add("active");
+      });
+    });
+
+    // =========================
+    // 6) Experience Data (YOUR LIST as template)
+    //    We will show it with pagination + collapses
+    // =========================
+    const experiences = [
+      { title: "President of SISC135", meta: "Year 1", detail: "Led academic planning, coordinated events, and supported peers." },
+      { title: "President Dormitory of SISC135", meta: "Year 2", detail: "Managed dormitory community, activities, and student welfare." },
+      { title: "President of Hail Night", meta: "2025", detail: "Directed the event operation, team leadership, and logistics." },
+      { title: "President of Halloween Night", meta: "2024", detail: "Planned creative program flow and managed staff team." },
+      { title: "President of Roonoo Cup", meta: "2026", detail: "Led full event execution, sponsorship, and tournament management." },
+      { title: "Vice President of Roonoo Cup", meta: "2025", detail: "Co-led operations and ensured smooth competition flow." },
+      { title: "Project Advisor of 4th SIMSAT", meta: "2025", detail: "Guided project structure, timeline, and team deliverables." },
+      { title: "Director of EA, 16th SIMPIC", meta: "2025", detail: "Directed External Affairs: partnerships, outreach, and coordination." },
+      { title: "Assistant Director of EA, 15th SIMPIC", meta: "2024", detail: "Supported external affairs and stakeholder communication." },
+      { title: "Deputy Vice President of PDC, Management of SMSU", meta: "2025", detail: "Managed PDC system, internal ops, and team coordination." },
+      { title: "Coreteam of PDC, Management of SMSU", meta: "2025", detail: "Handled PDC execution, planning tasks, and support roles." },
+      { title: "Main Hall Speaker & Pi-shaped Staff of SIOPH", meta: "2025", detail: "Speaker role + main hall staff operations." },
+      { title: "Group Staff of SIOPH", meta: "2024", detail: "Supported group operations, teamwork, and event facilitation." },
+      { title: "Speaker FCC of 26th SIMC", meta: "2025", detail: "Delivered session content and facilitated participant learning." },
+      { title: "Rally Station Staff of 25th SIMC", meta: "2024", detail: "Supported station flow and participant engagement." },
+      { title: "Academic & Facilitator of ReHackSearch, IFMSA Thailand", meta: "2025", detail: "Designed academic content and facilitated group sessions." },
+      { title: "Activity of Nice2MeetYa", meta: "2025", detail: "Organized activity flow and supported participants." }
+    ];
+
+    // Pagination settings
+    const perPage = 6;
+    let page = 1;
+
+    const expList = document.getElementById("expList");
+    const prevBtn = document.getElementById("prevPage");
+    const nextBtn = document.getElementById("nextPage");
+    const pagerInfo = document.getElementById("pagerInfo");
+
+    function renderExperience() {
+      expList.innerHTML = "";
+
+      const start = (page - 1) * perPage;
+      const end = start + perPage;
+      const slice = experiences.slice(start, end);
+
+      slice.forEach((item) => {
+        const el = document.createElement("details");
+        el.innerHTML = `
+          <summary>
+            <div class="sumLeft">
+              <div class="sumTitle">${item.title}</div>
+              <div class="sumMeta">${item.meta}</div>
+            </div>
+            <span class="chev"></span>
+          </summary>
+          <div class="detailBody">
+            ${item.detail}
+            <div class="tagPillRow">
+              <span class="tagPill">Leadership</span>
+              <span class="tagPill">Event</span>
+              <span class="tagPill">Teamwork</span>
+            </div>
+          </div>
+        `;
+        expList.appendChild(el);
+      });
+
+      const shownFrom = start + 1;
+      const shownTo = Math.min(end, experiences.length);
+      pagerInfo.textContent = `Showing ${shownFrom}–${shownTo} of ${experiences.length}`;
+
+      prevBtn.disabled = page === 1;
+      nextBtn.disabled = end >= experiences.length;
+    }
+
+    prevBtn.addEventListener("click", () => { page--; renderExperience(); });
+    nextBtn.addEventListener("click", () => { page++; renderExperience(); });
+
+    renderExperience();
+  </script>
+</body>
+
+</html>
